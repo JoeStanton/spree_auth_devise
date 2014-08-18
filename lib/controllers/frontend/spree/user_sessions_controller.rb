@@ -31,7 +31,7 @@ class Spree::UserSessionsController < Devise::SessionsController
     else
       respond_to do |format|
         format.html {
-          flash.now[:error] = t('devise.failure.invalid')
+          flash.now[:error] = t("devise.failure.#{warden.message || 'invalid'}")
           render :new
         }
         format.js {
