@@ -38,14 +38,39 @@ and then, run this command in order to set up the admin user for the application
 
     bundle exec rake spree_auth:admin:create
 
+## Configuration
+
+### Confirmable
+
+To enable Devise's Confirmable module, which will send the user an email with a link to confirm their account, you must do the following:
+
+* Add this line to an initializer in your Rails project (typically `config/initializers/spree.rb`):
+```ruby
+Spree::Auth::Config[:confirmable] = true
+```
+
+* Add a Devise initializer to your Rails project (typically `config/initializers/devise.rb`):
+```ruby
+Devise.setup do |config|
+  # Required so users don't lose their carts when they need to confirm.
+  config.allow_unconfirmed_access_for = 1.days
+
+  # Fixes the bug where Confirmation errors result in a broken page.
+  config.router_name = :spree
+
+  # Add any other devise configurations here, as they will override the defaults provided by spree_auth_devise.
+end
+```
+
 ## Using in an existing Rails application
+
 If you are installing Spree inside of a host application in which you want your own permission setup, you can do this using spree_auth_devise's register_ability method.
 
 First create your own CanCan Ability class following the CanCan documentation.
 
 For example: app/models/your_ability_class.rb
 
-```
+```ruby
 class YourAbilityClass
   include CanCan::Ability
 
@@ -58,26 +83,24 @@ class YourAbilityClass
        can :create, SomeRailsAdminObject
      end
    end
-
 end
 ```
 
-Then register your class in your spree initializer:  config/initializers/spree.rb
-```
+Then register your class in your spree initializer: config/initializers/spree.rb
+```ruby
 Spree::Ability.register_ability(YourAbilityClass)
 ```
 
-Inside of your host application you can then use CanCan like you normally out.
-```
+Inside of your host application you can then use CanCan like you normally would.
+```ruby
 <% if can? :show SomeRailsObject %>
 
 <% end %>
 ```
 
-###Adding Permissions to Gems
+### Adding Permissions to Gems
+
 This methodology can also be used by gems that extend spree and want/need to add permissions.
-
-
 
 ## Testing
 

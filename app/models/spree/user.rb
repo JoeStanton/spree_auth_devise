@@ -1,22 +1,23 @@
 module Spree
   class User < ActiveRecord::Base
-    include Core::UserAddress
-    include Core::UserPaymentSource
+    include UserAddress
+    include UserPaymentSource
 
     devise :database_authenticatable, :registerable, :recoverable,
            :rememberable, :trackable, :validatable, :encryptable, :encryptor => 'authlogic_sha512'
+    devise :confirmable if Spree::Auth::Config[:confirmable]
+
+    acts_as_paranoid
+    after_destroy :scramble_email_and_password
 
     has_many :orders
 
     before_validation :set_login
-    before_destroy :check_completed_orders
 
     users_table_name = User.table_name
     roles_table_name = Role.table_name
 
     scope :admin, -> { includes(:spree_roles).where("#{roles_table_name}.name" => "admin") }
-
-    class DestroyWithOrdersError < StandardError; end
 
     def self.admin_created?
       User.admin.count > 0
@@ -33,13 +34,17 @@ module Spree
 
     private
 
-      def check_completed_orders
-        raise DestroyWithOrdersError if orders.complete.present?
-      end
-
       def set_login
         # for now force login to be same as email, eventually we will make this configurable, etc.
         self.login ||= self.email if self.email
+      end
+
+      def scramble_email_and_password
+        self.email = SecureRandom.uuid + "@example.net"
+        self.login = self.email
+        self.password = SecureRandom.hex(8)
+        self.password_confirmation = self.password
+        self.save
       end
   end
 end
