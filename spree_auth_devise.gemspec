@@ -1,9 +1,11 @@
 # encoding: UTF-8
 
+require_relative 'lib/spree_auth_devise/version'
+
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_auth_devise'
-  s.version     = '2.3.0'
+  s.version     = SpreeAuthDevise::VERSION
   s.summary     = 'Provides authentication and authorization services for use with Spree by using Devise and CanCan.'
   s.description = s.summary
 
@@ -47,4 +49,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov', '~> 0.7.1'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'test-unit'
+  s.add_development_dependency 'rake', '~> 10.0'
 end
